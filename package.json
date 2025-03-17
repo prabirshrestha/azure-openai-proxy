@@ -1,0 +1,26 @@
+{
+  "name": "azure-openai-proxy",
+  "version": "0.0.1",
+  "description": "A proxy server for Azure Open API using azure cli for authentication.",
+  "keywords": [
+    "azure",
+    "openai",
+    "proxy"
+  ],
+  "homepage": "https://github.com/prabirshrestha/azure-openai-proxy",
+  "bugs": {
+    "url": "https://github.com/prabirshrestha/azure-openai-proxy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prabirshrestha/azure-openai-proxy.git"
+  },
+  "license": "MIT",
+  "author": "Prabir Shrestha",
+  "type": "commonjs",
+  "main": "./azure-openai-proxy.js",
+  "bin": "./azure-openai-proxy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
