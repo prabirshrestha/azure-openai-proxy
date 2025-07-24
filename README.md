@@ -8,6 +8,14 @@ CLI tool to create open ai compatible endpoints for azure open ai by using azure
 
 2. Add `~/.azure-openai-proxy.json` with the following content replacing the resource name and deployment names correctly.
 
+The configuration supports the following options for model definitions:
+- Simple string format: Maps model name to Azure deployment name
+- Object format with the following properties:
+  - `deployment`: (Required) The Azure deployment name
+  - `endpoint`: (Optional) Override the default endpoint for this model
+  - `apiVersion`: (Optional) Override the default API version for this model
+  - `modelName`: (Optional) Override the model parameter sent to Azure API
+
 ```json
 {
   "defaultEndpoint": "https://resourcename.openai.azure.com",
@@ -18,6 +26,10 @@ CLI tool to create open ai compatible endpoints for azure open ai by using azure
       "endpoint": "https://resourcename2.openai.azure.com"
     },
     "gpt-4o-mini": "gpt-4o-mini",
+    "DeepSeek-R1-abyc": {
+      "deployment": "deepseek-r1-deployment",
+      "modelName": "DeepSeek-R1"
+    },
     "text-embedding-3-large": "text-embedding-3-large"
   }
 }

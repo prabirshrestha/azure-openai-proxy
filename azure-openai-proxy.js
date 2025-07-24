@@ -213,14 +213,16 @@ function resolveModelConfig(model, config) {
       deployment: modelConfig,
       endpoint: config.defaultEndpoint,
       apiVersion: config.defaultApiVersion,
+      modelName: null, // No model name override
     };
   }
 
-  // Otherwise, it's an object with potentially custom endpoint and apiVersion
+  // Otherwise, it's an object with potentially custom endpoint, apiVersion, and modelName
   return {
     deployment: modelConfig.deployment,
     endpoint: modelConfig.endpoint || config.defaultEndpoint,
     apiVersion: modelConfig.apiVersion || config.defaultApiVersion,
+    modelName: modelConfig.modelName || null, // Include modelName if present
   };
 }
 
@@ -267,6 +269,11 @@ async function startServer() {
 
         console.log(`Routing to: ${azureUrl}`);
 
+        if (modelConfig.modelName) {
+          requestBody = { ...requestBody, model: modelConfig.modelName };
+          console.log(`Using model override: ${modelConfig.modelName}`);
+        }
+
         if (isStreaming) {
           await streamResponse(azureUrl, requestBody, authToken, res);
         } else {
@@ -308,6 +315,11 @@ async function startServer() {
         const azureUrl = `${modelConfig.endpoint}/openai/deployments/${modelConfig.deployment}/embeddings?api-version=${modelConfig.apiVersion}`;
 
         console.log(`Routing to: ${azureUrl}`);
+
+        if (modelConfig.modelName) {
+          requestBody = { ...requestBody, model: modelConfig.modelName };
+          console.log(`Using model override: ${modelConfig.modelName}`);
+        }
 
         const response = await makeRegularRequest(
           azureUrl,
@@ -384,8 +396,11 @@ async function startServer() {
           `  "${modelName}" → "${modelConfig}" (using default endpoint: ${config.defaultEndpoint})`,
         );
       } else {
+        const modelNameInfo = modelConfig.modelName
+          ? ` as "${modelConfig.modelName}"`
+          : "";
         console.log(
-          `  "${modelName}" → "${modelConfig.deployment}" (endpoint: ${modelConfig.endpoint || config.defaultEndpoint})`,
+          `  "${modelName}" → "${modelConfig.deployment}"${modelNameInfo} (endpoint: ${modelConfig.endpoint || config.defaultEndpoint})`,
         );
       }
     }
