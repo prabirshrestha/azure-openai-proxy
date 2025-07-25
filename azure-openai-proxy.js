@@ -246,6 +246,70 @@ async function startServer() {
         return;
       }
 
+      // Passthrough for /openai/responses (any query string)
+      if (req.method === "POST" && req.url.startsWith("/openai/responses")) {
+        const requestBody = await parseRequestBody(req);
+
+        // Resolve model configuration to get the correct endpoint
+        let endpoint = config.defaultEndpoint;
+        let apiVersion = config.defaultApiVersion;
+
+        if (requestBody.model) {
+          const modelConfig = resolveModelConfig(requestBody.model, config);
+          if (modelConfig) {
+            endpoint = modelConfig.endpoint;
+            apiVersion = modelConfig.apiVersion;
+          } else {
+          }
+        } else {
+        }
+
+        // Parse URL to get path, ignore query string like chat completions
+        const urlObj = new URL(req.url, `http://${req.headers.host}`);
+        const azureUrl = `${endpoint}${urlObj.pathname}?api-version=${apiVersion}`;
+
+        // Use client's auth token if provided, otherwise use proxy token
+        let authToken;
+        if (req.headers.authorization) {
+          // Extract token from "Bearer token" format
+          authToken = req.headers.authorization.replace(/^Bearer\s+/i, "");
+        } else {
+          authToken = await getAuthToken();
+        }
+
+        const isStreaming = requestBody.stream === true;
+
+        try {
+          if (isStreaming) {
+            await streamResponse(azureUrl, requestBody, authToken, res);
+          } else {
+            const response = await makeRegularRequest(
+              azureUrl,
+              requestBody,
+              authToken,
+            );
+
+            res.writeHead(response.status, {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+              "Access-Control-Allow-Headers": CORS_ALLOWED_HEADERS,
+            });
+            res.end(JSON.stringify(response.data));
+          }
+        } catch (error) {
+          console.error("Error forwarding request:", error);
+          res.writeHead(500, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+            "Access-Control-Allow-Headers": CORS_ALLOWED_HEADERS,
+          });
+          res.end(JSON.stringify({ error: "Proxy error occurred" }));
+        }
+        return;
+      }
+
       // Handle chat completions
       if (req.method === "POST" && req.url === "/v1/chat/completions") {
         const requestBody = await parseRequestBody(req);

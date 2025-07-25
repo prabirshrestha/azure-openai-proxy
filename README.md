@@ -82,3 +82,22 @@ curl http://localhost:3000/v1/embeddings \
     "input": ["Your text here", "Another text to embed"]
   }'
 ```
+
+### OpenAI Response API
+
+```bash
+curl -X POST http://localhost:3000/openai/responses \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "model": "gpt-4.1",
+    "input": [
+      {
+        "type": "message",
+        "role": "user",
+        "content": "Tell me a joke"
+      }
+    ],
+    "truncation": "auto",
+    "stream": false
+  }'
+```
