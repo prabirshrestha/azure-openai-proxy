@@ -268,14 +268,8 @@ async function startServer() {
         const urlObj = new URL(req.url, `http://${req.headers.host}`);
         const azureUrl = `${endpoint}${urlObj.pathname}?api-version=${apiVersion}`;
 
-        // Use client's auth token if provided, otherwise use proxy token
-        let authToken;
-        if (req.headers.authorization) {
-          // Extract token from "Bearer token" format
-          authToken = req.headers.authorization.replace(/^Bearer\s+/i, "");
-        } else {
-          authToken = await getAuthToken();
-        }
+        // Always use proxy's Azure CLI token
+        const authToken = await getAuthToken();
 
         const isStreaming = requestBody.stream === true;
 
